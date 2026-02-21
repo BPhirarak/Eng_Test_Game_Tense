@@ -39,45 +39,41 @@
         /* Mobile Touch Controls */
         .touch-zone {
             position: absolute;
-            bottom: 20px;
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            bottom: 30px;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: white;
             user-select: none;
             backdrop-filter: blur(4px);
             z-index: 100;
         }
-        .touch-zone:active {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0.95);
-        }
-        #left-ctrl { left: 30px; }
-        #right-ctrl { right: 30px; }
+        #left-ctrl { left: 20px; }
+        #right-ctrl { right: 20px; }
 
         #reading-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             color: #fbbf24;
-            padding: 1.5rem 2rem;
+            padding: 1.5rem;
             border-radius: 1rem;
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             display: none;
             z-index: 20;
             border: 3px solid #fbbf24;
             text-align: center;
-            width: 80%;
-            max-width: 400px;
+            width: 85%;
+            max-width: 350px;
         }
     </style>
 </head>
@@ -88,7 +84,7 @@
     
     <div id="reading-overlay">GET READY!</div>
 
-    <!-- Mobile Controls -->
+    <!-- Controls -->
     <div id="left-ctrl" class="touch-zone pointer-events-auto md:hidden">⬅️</div>
     <div id="right-ctrl" class="touch-zone pointer-events-auto md:hidden">➡️</div>
     
@@ -106,7 +102,7 @@
             </div>
             
             <div class="flex flex-col gap-1 items-end text-[10px] md:text-xs">
-                <div class="bg-black/70 px-3 py-1 rounded-full border border-purple-500 text-purple-300 font-bold">LVL: <span id="lvl-val">1</span></div>
+                <div class="bg-black/70 px-3 py-1 rounded-full border border-purple-500 text-purple-300 font-bold">LVL: <span id="lvl-val">1</span>/3</div>
                 <div class="bg-black/70 px-3 py-1 rounded-full border border-yellow-500 text-yellow-400 font-bold">Score: <span id="score-val">0</span></div>
                 <div class="bg-black/70 px-3 py-1 rounded-full border border-red-500 text-red-400 font-bold"><span id="game-timer">05:00</span></div>
                 <div class="bg-black/70 px-3 py-1 rounded-full border border-blue-500 text-blue-400 font-bold">Q: <span id="q-count">0</span>/20</div>
@@ -118,28 +114,28 @@
     </div>
 
     <!-- Overlays -->
-    <div id="start-screen" class="absolute inset-0 bg-black/90 flex items-center justify-center z-50 text-white p-6 text-center">
+    <div id="start-screen" class="absolute inset-0 bg-black/95 flex items-center justify-center z-50 text-white p-6 text-center">
         <div class="max-w-md">
-            <h1 class="text-4xl font-bold text-yellow-500 mb-2">English Catcher</h1>
-            <p class="text-blue-400 mb-6 font-semibold">3 Levels • Mobile Optimized</p>
-            <button onclick="startGame()" class="px-10 py-4 bg-blue-600 rounded-full text-2xl font-bold shadow-lg pointer-events-auto">PLAY NOW</button>
-            <p class="mt-6 text-sm text-gray-400">Tap screen sides or use arrows to move</p>
+            <h1 class="text-4xl font-bold text-yellow-500 mb-2 italic">ENGLISH CATCHER</h1>
+            <p class="text-blue-400 mb-6 font-semibold">Fun Grammar Challenge</p>
+            <button onclick="startGame()" class="px-12 py-4 bg-blue-600 rounded-full text-2xl font-bold shadow-lg pointer-events-auto hover:bg-blue-500 transition-colors">PLAY NOW</button>
+            <p class="mt-8 text-xs text-gray-400">TIPS: Catch balls with bucket. Wrong balls release peters!</p>
         </div>
     </div>
 
-    <div id="level-screen" class="hidden absolute inset-0 bg-blue-900/95 flex items-center justify-center z-50 text-white p-6 text-center">
+    <div id="level-screen" class="hidden absolute inset-0 bg-indigo-900/95 flex items-center justify-center z-50 text-white p-6 text-center">
         <div>
-            <h1 class="text-5xl font-bold text-yellow-400 mb-4">LEVEL UP!</h1>
-            <p class="text-xl mb-8">Next Level: <span id="next-lvl-name">2</span></p>
-            <button onclick="startNextLevel()" class="px-12 py-4 bg-yellow-500 text-black rounded-full text-2xl font-bold pointer-events-auto">READY</button>
+            <h1 class="text-5xl font-bold text-yellow-400 mb-4 italic">LEVEL COMPLETE!</h1>
+            <p class="text-xl mb-8 font-light text-blue-200">Prepare for faster speed in Level <span id="next-lvl-name">2</span></p>
+            <button onclick="startNextLevel()" class="px-14 py-4 bg-yellow-500 text-black rounded-full text-2xl font-bold pointer-events-auto hover:bg-yellow-400 transition-colors">READY</button>
         </div>
     </div>
 
     <div id="game-over-screen" class="hidden absolute inset-0 bg-black/95 flex items-center justify-center z-50 text-white p-6 text-center">
         <div>
-            <h1 id="result-title" class="text-5xl font-bold mb-4">GAME OVER</h1>
+            <h1 id="result-title" class="text-5xl font-bold mb-4 text-red-500">GAME OVER</h1>
             <div id="final-score" class="text-6xl font-bold text-yellow-500 mb-6">0 🪙</div>
-            <button onclick="location.reload()" class="px-8 py-3 bg-green-600 rounded-full text-xl font-bold pointer-events-auto">TRY AGAIN</button>
+            <button onclick="location.reload()" class="px-10 py-3 bg-green-600 rounded-full text-xl font-bold pointer-events-auto">TRY AGAIN</button>
         </div>
     </div>
 </div>
@@ -183,9 +179,9 @@
     ];
 
     const lvls = [
-        { speedMult: 0.6, label: "Level 1" },
-        { speedMult: 1.0, label: "Level 2" },
-        { speedMult: 1.5, label: "Level 3" }
+        { speedMult: 0.5, label: "Level 1" },
+        { speedMult: 0.9, label: "Level 2" },
+        { speedMult: 1.4, label: "Level 3" }
     ];
 
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
@@ -197,28 +193,26 @@
     function resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        // Responsive Bucket: 18% width on mobile, max 120px
-        bucket.width = Math.min(120, canvas.width * 0.18);
-        bucket.height = bucket.width * 0.5;
-        bucket.y = canvas.height - 120;
+        // MOBILE OPTIMIZED BUCKET: 15% width on small screens, max 100px
+        bucket.width = Math.min(100, canvas.width * 0.15);
+        bucket.height = bucket.width * 0.6;
+        bucket.y = canvas.height - 100;
         bucket.x = Math.max(0, Math.min(canvas.width - bucket.width, bucket.x));
-        // Responsive Speed
-        bucket.moveSpeed = canvas.width * 0.025;
+        bucket.moveSpeed = canvas.width * 0.022; // Slightly tuned for control
     }
     window.addEventListener('resize', resize); resize();
 
-    // Inputs
     window.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') keys.Left = true; if (e.key === 'ArrowRight') keys.Right = true; });
     window.addEventListener('keyup', e => { if (e.key === 'ArrowLeft') keys.Left = false; if (e.key === 'ArrowRight') keys.Right = false; });
     
-    // Direct Touch Logic
+    // Direct Screen Touch
     window.addEventListener('touchstart', e => {
         const x = e.touches[0].clientX;
         if (x < canvas.width / 2) keys.Left = true; else keys.Right = true;
-    });
+    }, {passive: false});
     window.addEventListener('touchend', () => { keys.Left = false; keys.Right = false; });
 
-    // On-screen Buttons
+    // Buttons
     const lBtn = document.getElementById('left-ctrl'), rBtn = document.getElementById('right-ctrl');
     lBtn.onmousedown = lBtn.ontouchstart = (e) => { e.stopPropagation(); keys.Left = true; };
     lBtn.onmouseup = lBtn.ontouchend = () => keys.Left = false;
@@ -227,11 +221,16 @@
 
     function startGame() {
         initAudio(); document.getElementById('start-screen').style.display = 'none';
-        active = true; score = 0; lvl = 1;
+        active = true; score = 0; lvl = 1; gameTime = 300;
         startRound();
         requestAnimationFrame(loop);
-        setInterval(() => { if (active) { gameTime--; updateUI(); if(gameTime<=0) end("TIME'S UP!"); }}, 1000);
-        setInterval(() => { if (active && !waiting) { qTime -= 0.1; updateUI(); if(qTime<=0) miss(); }}, 100);
+        
+        // Use a single timer reference to avoid duplicate intervals
+        if (!window.gameIntervalsSet) {
+            setInterval(() => { if (active) { gameTime--; updateUI(); if(gameTime<=0) end("TIME'S UP!"); }}, 1000);
+            setInterval(() => { if (active && !waiting) { qTime -= 0.1; updateUI(); if(qTime<=0) miss(); }}, 100);
+            window.gameIntervalsSet = true;
+        }
     }
 
     function startRound() {
@@ -242,7 +241,10 @@
 
     function startNextLevel() {
         document.getElementById('level-screen').classList.add('hidden');
-        lvl++; active = true; startRound();
+        lvl++; 
+        active = true; 
+        startRound();
+        requestAnimationFrame(loop); // RESTART THE LOOP HERE
     }
 
     function nextQ() {
@@ -269,11 +271,10 @@
         ['a','b','c','d'].forEach((l, i) => {
             balls.push({
                 x: (canvas.width / 5) * (i + 1),
-                y: -40 - (Math.random() * 100),
-                r: Math.min(22, canvas.width * 0.04),
+                y: -50 - (Math.random() * 120),
+                r: Math.min(20, canvas.width * 0.045),
                 choice: l, color: ['#ef4444','#3b82f6','#22c55e','#eab308'][i],
-                // Speed scales with height to feel consistent
-                speed: (canvas.height * 0.0018 + (Math.random() * 1)) * config.speedMult
+                speed: (canvas.height * 0.0016 + (Math.random() * 0.8)) * config.speedMult
             });
         });
     }
@@ -290,10 +291,10 @@
         document.getElementById('score-val').innerText = score;
         document.getElementById('q-count').innerText = qIdx;
         document.getElementById('lvl-val').innerText = lvl;
-        const m = Math.floor(gameTime/60), s = gameTime%60;
+        const m = Math.floor(gameTime/60), s = Math.max(0, gameTime%60);
         document.getElementById('game-timer').innerText = `${m}:${s.toString().padStart(2,'0')}`;
-        document.getElementById('q-timer-bar').style.width = waiting ? "100%" : (qTime/25*100) + "%";
-        if (waiting) document.getElementById('reading-overlay').innerText = `READING... ${Math.ceil(waitT)}`;
+        document.getElementById('q-timer-bar').style.width = waiting ? "100%" : (Math.max(0, qTime)/25*100) + "%";
+        if (waiting) document.getElementById('reading-overlay').innerText = `LEVEL ${lvl}: READING... ${Math.ceil(waitT)}`;
     }
 
     function end(t) {
@@ -304,7 +305,8 @@
     }
 
     function loop() {
-        if (!active) return;
+        if (!active) return; // This is why the loop stops when active is false
+        
         if (keys.Left) bucket.x -= bucket.moveSpeed;
         if (keys.Right) bucket.x += bucket.moveSpeed;
         bucket.x = Math.max(0, Math.min(canvas.width - bucket.width, bucket.x));
@@ -313,11 +315,17 @@
             waitT -= 0.016;
             if (waitT <= 0) spawn();
         } else {
-            balls.forEach((b, i) => {
+            for (let i = balls.length - 1; i >= 0; i--) {
+                let b = balls[i];
                 b.y += b.speed;
-                if (b.y+b.r > bucket.y && b.y-b.r < bucket.y+bucket.height && b.x+b.r > bucket.x && b.x-b.r < bucket.x+bucket.width) catchBall(b);
-                else if (b.y-b.r > canvas.height) { balls.splice(i,1); if(!balls.length) miss(); }
-            });
+                if (b.y+b.r > bucket.y && b.y-b.r < bucket.y+bucket.height && b.x+b.r > bucket.x && b.x-b.r < bucket.x+bucket.width) {
+                    catchBall(b);
+                    break;
+                } else if (b.y-b.r > canvas.height) { 
+                    balls.splice(i,1); 
+                    if(!balls.length) miss(); 
+                }
+            }
         }
         peters.forEach(p => { p.x += p.vx; if(p.x<0 || p.x>canvas.width) p.vx*=-1; });
         draw();
