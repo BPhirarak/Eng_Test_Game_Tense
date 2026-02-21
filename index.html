@@ -17,7 +17,6 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            max-width: 800px;
             margin: 0 auto;
             background: linear-gradient(to bottom, #2d3748, #1a202c);
             overflow: hidden;
@@ -37,37 +36,48 @@
         .pointer-events-auto {
             pointer-events: auto;
         }
-        .btn-control {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.2);
+        /* Mobile Touch Controls */
+        .touch-zone {
+            position: absolute;
+            bottom: 20px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: white;
             user-select: none;
+            backdrop-filter: blur(4px);
+            z-index: 100;
         }
-        .btn-control:active {
+        .touch-zone:active {
             background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.95);
         }
+        #left-ctrl { left: 30px; }
+        #right-ctrl { right: 30px; }
+
         #reading-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             color: #fbbf24;
-            padding: 1.5rem 3rem;
+            padding: 1.5rem 2rem;
             border-radius: 1rem;
             font-weight: bold;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             display: none;
             z-index: 20;
             border: 3px solid #fbbf24;
             text-align: center;
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            width: 80%;
+            max-width: 400px;
         }
     </style>
 </head>
@@ -75,123 +85,81 @@
 
 <div id="game-container">
     <canvas id="gameCanvas"></canvas>
-    <div id="reading-overlay">GET READY! 3</div>
+    
+    <div id="reading-overlay">GET READY!</div>
+
+    <!-- Mobile Controls -->
+    <div id="left-ctrl" class="touch-zone pointer-events-auto md:hidden">⬅️</div>
+    <div id="right-ctrl" class="touch-zone pointer-events-auto md:hidden">➡️</div>
     
     <!-- UI Layer -->
     <div class="ui-layer flex flex-col p-4">
-        <!-- Top Info -->
-        <div class="flex justify-between items-start text-white drop-shadow-md">
-            <div class="bg-black/40 p-3 rounded-lg max-w-[70%] border border-white/20">
-                <div id="question-text" class="text-lg font-bold leading-tight mb-2">Loading game...</div>
-                <div id="choices-container" class="grid grid-cols-2 gap-2 text-sm">
-                    <div id="choice-a" class="flex items-center"><span class="w-6 h-6 rounded bg-red-500 inline-flex items-center justify-center mr-1 text-xs">A</span> <span class="text-label">...</span></div>
-                    <div id="choice-b" class="flex items-center"><span class="w-6 h-6 rounded bg-blue-500 inline-flex items-center justify-center mr-1 text-xs">B</span> <span class="text-label">...</span></div>
-                    <div id="choice-c" class="flex items-center"><span class="w-6 h-6 rounded bg-green-500 inline-flex items-center justify-center mr-1 text-xs">C</span> <span class="text-label">...</span></div>
-                    <div id="choice-d" class="flex items-center"><span class="w-6 h-6 rounded bg-yellow-500 inline-flex items-center justify-center mr-1 text-xs">D</span> <span class="text-label">...</span></div>
+        <div class="flex justify-between items-start text-white">
+            <div class="bg-black/60 p-3 rounded-lg max-w-[65%] border border-white/20">
+                <div id="question-text" class="text-sm md:text-lg font-bold leading-tight mb-2">Loading...</div>
+                <div id="choices-container" class="grid grid-cols-1 md:grid-cols-2 gap-1 text-[10px] md:text-sm">
+                    <div id="choice-a" class="flex items-center"><span class="w-5 h-5 rounded bg-red-500 inline-flex items-center justify-center mr-1 text-[10px]">A</span> <span class="text-label truncate">...</span></div>
+                    <div id="choice-b" class="flex items-center"><span class="w-5 h-5 rounded bg-blue-500 inline-flex items-center justify-center mr-1 text-[10px]">B</span> <span class="text-label truncate">...</span></div>
+                    <div id="choice-c" class="flex items-center"><span class="w-5 h-5 rounded bg-green-500 inline-flex items-center justify-center mr-1 text-[10px]">C</span> <span class="text-label truncate">...</span></div>
+                    <div id="choice-d" class="flex items-center"><span class="w-5 h-5 rounded bg-yellow-500 inline-flex items-center justify-center mr-1 text-[10px]">D</span> <span class="text-label truncate">...</span></div>
                 </div>
             </div>
             
-            <div class="flex flex-col gap-2 items-end">
-                <div class="bg-black/60 px-4 py-2 rounded-full border-2 border-purple-500 text-purple-400 font-bold whitespace-nowrap text-sm">
-                    LVL: <span id="lvl-val">1</span>/3
-                </div>
-                <div class="bg-black/60 px-4 py-2 rounded-full border-2 border-yellow-500 text-yellow-400 font-bold whitespace-nowrap text-sm">
-                    Score: <span id="score-val">0</span> 🪙
-                </div>
-                <div class="bg-black/60 px-4 py-2 rounded-full border-2 border-red-500 text-red-400 font-bold whitespace-nowrap text-sm">
-                    Time: <span id="game-timer">05:00</span>
-                </div>
-                <div class="bg-black/60 px-4 py-2 rounded-full border-2 border-blue-500 text-blue-400 font-bold whitespace-nowrap text-sm">
-                    Q: <span id="q-count">0</span>/20
-                </div>
+            <div class="flex flex-col gap-1 items-end text-[10px] md:text-xs">
+                <div class="bg-black/70 px-3 py-1 rounded-full border border-purple-500 text-purple-300 font-bold">LVL: <span id="lvl-val">1</span></div>
+                <div class="bg-black/70 px-3 py-1 rounded-full border border-yellow-500 text-yellow-400 font-bold">Score: <span id="score-val">0</span></div>
+                <div class="bg-black/70 px-3 py-1 rounded-full border border-red-500 text-red-400 font-bold"><span id="game-timer">05:00</span></div>
+                <div class="bg-black/70 px-3 py-1 rounded-full border border-blue-500 text-blue-400 font-bold">Q: <span id="q-count">0</span>/20</div>
             </div>
         </div>
-
-        <!-- Question Timer Bar -->
-        <div class="mt-4 w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-            <div id="q-timer-bar" class="h-full bg-green-500 transition-all duration-100" style="width: 100%;"></div>
+        <div class="mt-2 w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div id="q-timer-bar" class="h-full bg-green-500" style="width: 100%;"></div>
         </div>
     </div>
 
-    <!-- Controls Layer -->
-    <div class="ui-layer flex items-end justify-between p-8 pointer-events-none">
-        <div class="flex gap-4 pointer-events-auto md:hidden">
-            <div id="btn-left" class="btn-control">⬅️</div>
-            <div id="btn-right" class="btn-control">➡️</div>
+    <!-- Overlays -->
+    <div id="start-screen" class="absolute inset-0 bg-black/90 flex items-center justify-center z-50 text-white p-6 text-center">
+        <div class="max-w-md">
+            <h1 class="text-4xl font-bold text-yellow-500 mb-2">English Catcher</h1>
+            <p class="text-blue-400 mb-6 font-semibold">3 Levels • Mobile Optimized</p>
+            <button onclick="startGame()" class="px-10 py-4 bg-blue-600 rounded-full text-2xl font-bold shadow-lg pointer-events-auto">PLAY NOW</button>
+            <p class="mt-6 text-sm text-gray-400">Tap screen sides or use arrows to move</p>
         </div>
     </div>
 
-    <!-- Start Screen -->
-    <div id="start-screen" class="absolute inset-0 bg-black/80 flex items-center justify-center z-50 text-white p-6 text-center">
+    <div id="level-screen" class="hidden absolute inset-0 bg-blue-900/95 flex items-center justify-center z-50 text-white p-6 text-center">
         <div>
-            <h1 class="text-5xl font-bold text-yellow-500 mb-2">English Grammar Catcher</h1>
-            <p class="text-xl text-blue-400 mb-6 font-semibold">3 Levels • 60 Questions • High Speed Grammar</p>
-            <p class="mb-6 text-gray-300 max-w-md mx-auto">Read the question for 4 seconds, then catch the correct ball. Level 2 and 3 get faster! Don't let the peters distract you.</p>
-            <button onclick="startGame()" class="px-10 py-4 bg-blue-600 hover:bg-blue-700 rounded-full text-2xl font-bold transition shadow-lg pointer-events-auto">START MISSION</button>
-            <p class="mt-4 text-xs text-gray-500">Enable Sound for the Best Experience</p>
+            <h1 class="text-5xl font-bold text-yellow-400 mb-4">LEVEL UP!</h1>
+            <p class="text-xl mb-8">Next Level: <span id="next-lvl-name">2</span></p>
+            <button onclick="startNextLevel()" class="px-12 py-4 bg-yellow-500 text-black rounded-full text-2xl font-bold pointer-events-auto">READY</button>
         </div>
     </div>
 
-    <!-- Level Transition Screen -->
-    <div id="level-screen" class="hidden absolute inset-0 bg-blue-900/90 flex items-center justify-center z-50 text-white p-6 text-center">
-        <div>
-            <h1 class="text-6xl font-bold text-yellow-400 mb-4 italic">LEVEL COMPLETE!</h1>
-            <p class="text-2xl mb-8">Prepare for <span id="next-lvl-name" class="font-bold text-red-400 underline">Level 2</span></p>
-            <div class="text-gray-200 mb-8 italic">"Speed is increasing..."</div>
-            <button onclick="startNextLevel()" class="px-12 py-4 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full text-2xl font-bold transition shadow-lg pointer-events-auto">CONTINUE</button>
-        </div>
-    </div>
-
-    <!-- Game Over Screen -->
     <div id="game-over-screen" class="hidden absolute inset-0 bg-black/95 flex items-center justify-center z-50 text-white p-6 text-center">
         <div>
-            <h1 id="result-title" class="text-5xl font-bold mb-4 text-red-500">GAME OVER</h1>
-            <p class="text-2xl mb-2">Final Score</p>
+            <h1 id="result-title" class="text-5xl font-bold mb-4">GAME OVER</h1>
             <div id="final-score" class="text-6xl font-bold text-yellow-500 mb-6">0 🪙</div>
-            <p id="result-message" class="mb-8 text-gray-400 text-lg">Keep practicing your grammar!</p>
-            <button onclick="location.reload()" class="px-8 py-3 bg-green-600 hover:bg-green-700 rounded-full text-xl font-bold transition pointer-events-auto">PLAY AGAIN</button>
+            <button onclick="location.reload()" class="px-8 py-3 bg-green-600 rounded-full text-xl font-bold pointer-events-auto">TRY AGAIN</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Audio Context Setup
     let audioCtx = null;
     function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-
-    function playSuccessSound() {
+    
+    function playSnd(freq, dur, type='triangle', slide=0) {
         if (!audioCtx) return;
         const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'triangle'; const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(523.25, now); osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.1);
-        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now); osc.stop(now + 0.2);
+        osc.type = type; const now = audioCtx.currentTime;
+        osc.frequency.setValueAtTime(freq, now);
+        if(slide) osc.frequency.exponentialRampToValueAtTime(freq+slide, now+dur);
+        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
+        osc.start(now); osc.stop(now + dur);
     }
 
-    function playFailureSound() {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'sawtooth'; const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(50, now + 0.3);
-        gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now); osc.stop(now + 0.3);
-    }
-
-    function playScuttleSound() {
-        if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-        for(let i=0; i<3; i++) {
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = 'square'; osc.frequency.setValueAtTime(2000 + Math.random() * 3000, now + (i * 0.05));
-            gain.gain.setValueAtTime(0.02, now + (i * 0.05)); gain.gain.linearRampToValueAtTime(0, now + (i * 0.05) + 0.02);
-            osc.start(now + (i * 0.05)); osc.stop(now + (i * 0.05) + 0.02);
-        }
-    }
-
-    const questionInventory = [
+    const questions = [
         { q: "Oh look! It ______ snow soon.", a: "is going to", b: "will", c: "are going to", d: "goes to", correct: "a" },
         { q: "Next summer I ______ backpack around Europe.", a: "is going to", b: "am going to", c: "will", d: "was going to", correct: "b" },
         { q: "Ring! Ring! I ______ answer it.", a: "will", b: "am going to", c: "is going to", d: "shall", correct: "a" },
@@ -205,184 +173,172 @@
         { q: "Luis ______ (give) me a present.", a: "have gave", b: "has gave", c: "have given", d: "has given", correct: "d" },
         { q: "They ______ (not/buy) a computer yet.", a: "hasn't buy", b: "hasn't bought", c: "haven't buy", d: "haven't bought", correct: "d" },
         { q: "Sara ______ (forget) her money.", a: "has forget", b: "have forgot", c: "has forgotten", d: "has forgot", correct: "c" },
-        { q: "The past participle form of 'BITE' is?", a: "Bite", b: "Bitten", c: "Bit", d: "Bited", correct: "b" },
-        { q: "The past participle form of 'GO' is?", a: "Goed", b: "Went", c: "Go", d: "Gone", correct: "d" },
         { q: "They ______ each other for ten years.", a: "know", b: "knew", c: "have known", d: "has known", correct: "c" },
-        { q: "______ you ever seen a snake?", a: "Do", b: "Did", c: "Have", d: "Has", correct: "c" },
         { q: "My brother ______ his keys.", a: "lose", b: "lost", c: "have lost", d: "has lost", correct: "d" },
         { q: "I ______ here since 2015.", a: "live", b: "lived", c: "have lived", d: "has lived", correct: "c" },
         { q: "Watch out! You ______ fall!", a: "will", b: "are going to", c: "do", d: "go to", correct: "b" },
         { q: "Maybe it ______ sunny tomorrow.", a: "is going to be", b: "will be", c: "is", d: "be", correct: "b" },
         { q: "A: The phone is ringing. B: I ______ it!", a: "am going to answer", b: "will answer", c: "answer", d: "answering", correct: "b" },
-        { q: "I hope Thailand ______ win the match.", a: "is going to", b: "will", c: "wins", d: "winning", correct: "b" },
-        { q: "Scientists believe people ______ on Mars one day.", a: "are going to live", b: "will live", c: "live", d: "lived", correct: "b" }
+        { q: "I hope Thailand ______ win the match.", a: "is going to", b: "will", c: "wins", d: "winning", correct: "b" }
     ];
 
-    const levelConfigs = [
-        { minSpeed: 1.0, speedRange: 1.0, label: "Level 1: Beginner" },
-        { minSpeed: 1.8, speedRange: 1.5, label: "Level 2: Intermediate" },
-        { minSpeed: 2.5, speedRange: 2.5, label: "Level 3: Expert" }
+    const lvls = [
+        { speedMult: 0.6, label: "Level 1" },
+        { speedMult: 1.0, label: "Level 2" },
+        { speedMult: 1.5, label: "Level 3" }
     ];
 
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let gameActive = false, currentScore = 0, questionsPlayed = 0, currentLevel = 1;
-    let gameTimeLeft = 300, qTimeLeft = 25, scuttleCooldown = 0, isWaiting = false, waitTimer = 0;
-    let selectedQuestions = [], currentQ = null, peters = [], balls = [];
-    const bucket = { width: 100, height: 60, x: 0, y: 0, speed: 10 };
+    let active = false, score = 0, qIdx = 0, lvl = 1, gameTime = 300, qTime = 25;
+    let waiting = false, waitT = 0, currentQ = null, peters = [], balls = [];
+    const bucket = { width: 0, height: 0, x: 0, y: 0, speed: 0 };
     const keys = { Left: false, Right: false };
-    const totalQTime = 25; // Constant for UI percentage
 
     function resize() {
-        const container = document.getElementById('game-container');
-        canvas.width = container.clientWidth; canvas.height = container.clientHeight;
-        bucket.y = canvas.height - 80; bucket.x = canvas.width / 2 - bucket.width / 2;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // Responsive Bucket: 18% width on mobile, max 120px
+        bucket.width = Math.min(120, canvas.width * 0.18);
+        bucket.height = bucket.width * 0.5;
+        bucket.y = canvas.height - 120;
+        bucket.x = Math.max(0, Math.min(canvas.width - bucket.width, bucket.x));
+        // Responsive Speed
+        bucket.moveSpeed = canvas.width * 0.025;
     }
     window.addEventListener('resize', resize); resize();
+
+    // Inputs
     window.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') keys.Left = true; if (e.key === 'ArrowRight') keys.Right = true; });
     window.addEventListener('keyup', e => { if (e.key === 'ArrowLeft') keys.Left = false; if (e.key === 'ArrowRight') keys.Right = false; });
-    const btnLeft = document.getElementById('btn-left'), btnRight = document.getElementById('btn-right');
-    btnLeft.addEventListener('touchstart', e => { e.preventDefault(); keys.Left = true; });
-    btnLeft.addEventListener('touchend', e => { e.preventDefault(); keys.Left = false; });
-    btnRight.addEventListener('touchstart', e => { e.preventDefault(); keys.Right = true; });
-    btnRight.addEventListener('touchend', e => { e.preventDefault(); keys.Right = false; });
+    
+    // Direct Touch Logic
+    window.addEventListener('touchstart', e => {
+        const x = e.touches[0].clientX;
+        if (x < canvas.width / 2) keys.Left = true; else keys.Right = true;
+    });
+    window.addEventListener('touchend', () => { keys.Left = false; keys.Right = false; });
+
+    // On-screen Buttons
+    const lBtn = document.getElementById('left-ctrl'), rBtn = document.getElementById('right-ctrl');
+    lBtn.onmousedown = lBtn.ontouchstart = (e) => { e.stopPropagation(); keys.Left = true; };
+    lBtn.onmouseup = lBtn.ontouchend = () => keys.Left = false;
+    rBtn.onmousedown = rBtn.ontouchstart = (e) => { e.stopPropagation(); keys.Right = true; };
+    rBtn.onmouseup = rBtn.ontouchend = () => keys.Right = false;
 
     function startGame() {
-        initAudio(); document.getElementById('start-screen').classList.add('hidden');
-        gameActive = true; currentScore = 0; currentLevel = 1;
+        initAudio(); document.getElementById('start-screen').style.display = 'none';
+        active = true; score = 0; lvl = 1;
         startRound();
-        requestAnimationFrame(gameLoop);
-        setInterval(() => { if (gameActive) { gameTimeLeft--; if (gameTimeLeft <= 0) endGame("TIME'S UP!"); updateUI(); }}, 1000);
-        setInterval(() => { if (gameActive && !isWaiting) { qTimeLeft -= 0.1; if (qTimeLeft <= 0) onMiss(); updateUI(); }}, 100);
+        requestAnimationFrame(loop);
+        setInterval(() => { if (active) { gameTime--; updateUI(); if(gameTime<=0) end("TIME'S UP!"); }}, 1000);
+        setInterval(() => { if (active && !waiting) { qTime -= 0.1; updateUI(); if(qTime<=0) miss(); }}, 100);
     }
 
     function startRound() {
-        questionsPlayed = 0;
-        selectedQuestions = [...questionInventory].sort(() => 0.5 - Math.random()).slice(0, 20);
-        nextQuestion();
+        qIdx = 0;
+        selectedQs = [...questions].sort(() => 0.5-Math.random()).slice(0, 20);
+        nextQ();
     }
 
     function startNextLevel() {
         document.getElementById('level-screen').classList.add('hidden');
-        currentLevel++;
-        gameActive = true;
-        startRound();
+        lvl++; active = true; startRound();
     }
 
-    function nextQuestion() {
-        if (questionsPlayed >= 20) {
-            if (currentLevel < 3) {
-                gameActive = false;
+    function nextQ() {
+        if (qIdx >= 20) {
+            active = false;
+            if (lvl < 3) {
                 document.getElementById('level-screen').classList.remove('hidden');
-                document.getElementById('next-lvl-name').innerText = `Level ${currentLevel + 1}`;
-            } else {
-                endGame("GRAMMAR GRANDMASTER!");
-            }
+                document.getElementById('next-lvl-name').innerText = lvl + 1;
+            } else end("GRANDMASTER!");
             return;
         }
-        currentQ = selectedQuestions[questionsPlayed % selectedQuestions.length];
-        balls = []; isWaiting = true; waitTimer = 4.0;
+        currentQ = selectedQs[qIdx];
+        balls = []; waiting = true; waitT = 4.0;
         document.getElementById('question-text').innerText = currentQ.q;
-        document.getElementById('choice-a').querySelector('.text-label').innerText = currentQ.a;
-        document.getElementById('choice-b').querySelector('.text-label').innerText = currentQ.b;
-        document.getElementById('choice-c').querySelector('.text-label').innerText = currentQ.c;
-        document.getElementById('choice-d').querySelector('.text-label').innerText = currentQ.d;
+        ['a','b','c','d'].forEach(l => document.getElementById(`choice-${l}`).querySelector('.text-label').innerText = currentQ[l]);
         document.getElementById('reading-overlay').style.display = 'block';
-        questionsPlayed++;
-        updateUI();
+        qIdx++; updateUI();
     }
 
-    function spawnBalls() {
-        isWaiting = false; qTimeLeft = totalQTime;
+    function spawn() {
+        waiting = false; qTime = 25;
         document.getElementById('reading-overlay').style.display = 'none';
-        const choices = ['a', 'b', 'c', 'd'], colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308'];
-        const config = levelConfigs[currentLevel - 1];
-        choices.forEach((choice, i) => {
+        const config = lvls[lvl-1];
+        ['a','b','c','d'].forEach((l, i) => {
             balls.push({
                 x: (canvas.width / 5) * (i + 1),
-                y: -50 - (Math.random() * 150),
-                radius: 25, choice: choice, color: colors[i],
-                speed: config.minSpeed + (Math.random() * config.speedRange)
+                y: -40 - (Math.random() * 100),
+                r: Math.min(22, canvas.width * 0.04),
+                choice: l, color: ['#ef4444','#3b82f6','#22c55e','#eab308'][i],
+                // Speed scales with height to feel consistent
+                speed: (canvas.height * 0.0018 + (Math.random() * 1)) * config.speedMult
             });
         });
     }
 
-    function onCatch(ball) {
-        if (ball.choice === currentQ.correct) { currentScore += 10; playSuccessSound(); }
-        else { playFailureSound(); spawnPeter(); }
-        nextQuestion();
+    function catchBall(b) {
+        if (b.choice === currentQ.correct) { score += 10; playSnd(523, 0.2, 'triangle', 500); }
+        else { playSnd(150, 0.3, 'sawtooth', -100); peters.push({x:Math.random()*canvas.width, y:canvas.height-30, vx:(Math.random()-0.5)*6}); }
+        nextQ();
     }
 
-    function onMiss() { playFailureSound(); spawnPeter(); nextQuestion(); }
-
-    function spawnPeter() {
-        peters.push({ x: Math.random() * canvas.width, y: canvas.height - 30, vx: (Math.random() - 0.5) * 8, frame: 0 });
-    }
+    function miss() { playSnd(150, 0.3, 'sawtooth', -100); peters.push({x:Math.random()*canvas.width, y:canvas.height-30, vx:(Math.random()-0.5)*6}); nextQ(); }
 
     function updateUI() {
-        document.getElementById('score-val').innerText = currentScore;
-        document.getElementById('q-count').innerText = questionsPlayed;
-        document.getElementById('lvl-val').innerText = currentLevel;
-        const m = Math.floor(gameTimeLeft / 60), s = Math.floor(gameTimeLeft % 60);
-        document.getElementById('game-timer').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        const bar = document.getElementById('q-timer-bar'), pct = (qTimeLeft / totalQTime) * 100;
-        bar.style.width = isWaiting ? "100%" : pct + "%";
-        bar.style.backgroundColor = isWaiting ? "#a855f7" : (pct < 30 ? "#ef4444" : "#22c55e");
-        if (isWaiting) document.getElementById('reading-overlay').innerHTML = `<div class='text-sm text-white mb-2'>${levelConfigs[currentLevel-1].label}</div>GET READY! ${Math.ceil(waitTimer)}`;
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('q-count').innerText = qIdx;
+        document.getElementById('lvl-val').innerText = lvl;
+        const m = Math.floor(gameTime/60), s = gameTime%60;
+        document.getElementById('game-timer').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+        document.getElementById('q-timer-bar').style.width = waiting ? "100%" : (qTime/25*100) + "%";
+        if (waiting) document.getElementById('reading-overlay').innerText = `READING... ${Math.ceil(waitT)}`;
     }
 
-    function endGame(title) {
-        gameActive = false;
+    function end(t) {
+        active = false;
         document.getElementById('game-over-screen').classList.remove('hidden');
-        document.getElementById('result-title').innerText = title;
-        document.getElementById('result-title').className = title.includes("GRANDMASTER") ? "text-5xl font-bold mb-4 text-yellow-400" : "text-5xl font-bold mb-4 text-red-500";
-        document.getElementById('final-score').innerText = currentScore + " 🪙";
-        document.getElementById('result-message').innerText = currentLevel === 3 && questionsPlayed === 20 ? "Perfect performance across all levels!" : "Great effort! Try to master all three levels.";
+        document.getElementById('result-title').innerText = t;
+        document.getElementById('final-score').innerText = score + " 🪙";
     }
 
-    function gameLoop(time) {
-        if (!gameActive) return;
-        if (keys.Left) bucket.x -= bucket.speed;
-        if (keys.Right) bucket.x += bucket.speed;
+    function loop() {
+        if (!active) return;
+        if (keys.Left) bucket.x -= bucket.moveSpeed;
+        if (keys.Right) bucket.x += bucket.moveSpeed;
         bucket.x = Math.max(0, Math.min(canvas.width - bucket.width, bucket.x));
-        if (isWaiting) {
-            waitTimer -= 0.016;
-            if (waitTimer <= 0) spawnBalls();
+
+        if (waiting) {
+            waitT -= 0.016;
+            if (waitT <= 0) spawn();
         } else {
-            balls.forEach((ball, index) => {
-                ball.y += ball.speed;
-                if (ball.y + ball.radius > bucket.y && ball.y - ball.radius < bucket.y + bucket.height &&
-                    ball.x + ball.radius > bucket.x && ball.x - ball.radius < bucket.x + bucket.width) {
-                    onCatch(ball);
-                }
-                if (ball.y - ball.radius > canvas.height) {
-                    balls.splice(index, 1);
-                    if (balls.length === 0) onMiss();
-                }
+            balls.forEach((b, i) => {
+                b.y += b.speed;
+                if (b.y+b.r > bucket.y && b.y-b.r < bucket.y+bucket.height && b.x+b.r > bucket.x && b.x-b.r < bucket.x+bucket.width) catchBall(b);
+                else if (b.y-b.r > canvas.height) { balls.splice(i,1); if(!balls.length) miss(); }
             });
         }
-        if (peters.length > 0) {
-            scuttleCooldown--;
-            if (scuttleCooldown <= 0) { playScuttleSound(); scuttleCooldown = Math.max(8, 20 - peters.length); }
-        }
-        peters.forEach(p => { p.x += p.vx; if (p.x < 0 || p.x > canvas.width) p.vx *= -1; });
+        peters.forEach(p => { p.x += p.vx; if(p.x<0 || p.x>canvas.width) p.vx*=-1; });
         draw();
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(loop);
     }
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#4a5568'; ctx.beginPath(); ctx.roundRect(bucket.x, bucket.y, bucket.width, bucket.height, 10); ctx.fill();
-        ctx.strokeStyle = '#cbd5e0'; ctx.lineWidth = 3; ctx.stroke();
-        if (!isWaiting) {
-            balls.forEach(ball => {
-                ctx.fillStyle = ball.color; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
-                ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-                ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.choice.toUpperCase(), ball.x, ball.y + 7);
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        // Bucket
+        ctx.fillStyle = '#4a5568'; ctx.beginPath(); ctx.roundRect(bucket.x, bucket.y, bucket.width, bucket.height, 8); ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+        // Balls
+        if (!waiting) {
+            balls.forEach(b => {
+                ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = `bold ${b.r}px Arial`; ctx.textAlign='center'; ctx.fillText(b.choice.toUpperCase(), b.x, b.y+b.r/3);
             });
         }
+        // Peters
         peters.forEach(p => {
-            ctx.font = '30px Arial'; ctx.save(); ctx.translate(p.x, p.y);
-            if (p.vx < 0) ctx.scale(-1, 1); ctx.fillText('🪳', 0, 0); ctx.restore();
+            ctx.font = '24px Arial'; ctx.save(); ctx.translate(p.x, p.y); if(p.vx<0) ctx.scale(-1,1); ctx.fillText('🪳', 0, 0); ctx.restore();
         });
     }
 </script>
